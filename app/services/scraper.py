@@ -2,10 +2,12 @@ import logging
 from typing import Optional, Dict, Any, List
 from playwright.async_api import async_playwright
 
-logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 async def scrape_linkedin_page(page_id: str) -> Optional[Dict[str, Any]]:
     url = f"https://www.linkedin.com/company/{page_id}/"
+
+    data: Dict[str, Any] = {}
 
     try:
         async with async_playwright() as p:
@@ -21,7 +23,7 @@ async def scrape_linkedin_page(page_id: str) -> Optional[Dict[str, Any]]:
                 data["name"] = None
 
             try:
-                data["description"] = await page.locator("section.aboutus-us__descripton").inner_text()
+                data["description"] = await page.locator("section.aboutus-us__descrn").inner_text()
             except Exception:
                 data["description"] = None
             
@@ -48,33 +50,21 @@ async def scrape_linkedin_page(page_id: str) -> Optional[Dict[str, Any]]:
 
 
             posts: List[Dict[str, Any]] = []
-            post_cards = page.locator("div.feed-shared-update-v2")
-
-            count = min(await post_cards.count(), 15)
+            cards = page.locator("div.feed-shared-update-v2")
+            count = min(await cards.count(), 15)
 
             for i in range(count):
                 try:
-                    card = post_cards.nth(i)
-                    text = await card.locator("span.break-words").first.inner_text()
-
-                    try:
-                        likes = await card.locator("span.social-deatils-social-counts__reactions-count").inner_text()
-                    except Exception:
-                        likes = None
-
-                    posts.append(
-                        {
-                            "text": text,
-                            "likes": likes,
-                        }
-                    )
-                except Exception as e:
-                    logging.warning(f"Post scrape faild: {e}")
+                    text = await cards.nth(i).locator("p").inner_text()
+                    posts.append({"text": text})
+                except Exception:
+                    continue
 
             data["posts"] = posts
 
             await browser.close()
             return data
+        
     except Exception as e:
         logging.error(f"Failed to scrape LinkedIn page {page_id}: {e}")
         return None

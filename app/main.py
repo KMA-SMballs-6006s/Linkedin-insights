@@ -1,6 +1,11 @@
+import asyncio
+import sys
 from fastapi import FastAPI
 from app.db.mongo import connect_to_mongo, close_mongo_connection
 from app.api.pages import router as pages_router
+
+if sys.platform.startswith("win"):
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 app = FastAPI(title="LinkedIn Insights API")
 

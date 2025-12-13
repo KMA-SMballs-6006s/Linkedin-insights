@@ -1,3 +1,5 @@
+from app.services.cache import get as cache_get, set as cache_set
+from app.utils.serialize import serialize_mongo
 from fastapi import APIRouter, HTTPException, Query
 from app.db.pages import get_page_by_linkedin_id, insert_page
 from app.db.posts import get_posts_by_page_paginated
@@ -11,25 +13,48 @@ logger = logging.getLogger(__name__)
 
 @router.get("/pages/{page_id}")
 async def get_page(page_id: str):
+    cache_key = f"page:{page_id}"
+    
+    cached = cache_get(cache_key)
+    if cached:
+        return cached
+    
     page = await get_page_by_linkedin_id(page_id)
     if page:
-        return page
+        response = {
+            "_id": str(page["_id"]),
+            "linkedin_id": page["linkedin_id"],
+            "name": page.get("name"),
+            "linkedin_url": page.get("linkedin_url"),
+            "industry": page.get("industry"),
+        }
+        cache_set(cache_key, response)
+        return response
     
     scraped = await scrape_linkedin_page(page_id)
     if not scraped:
-        raise HTTPException(status_code=404, detail="Page not found")
+        raise HTTPException(status_code=404, detail="Page not found, unable to scrape")
     
     try:
         page_model= Page(
+            linkedin_id=page_id,
             name=scraped.get("name"),
             linkedin_url=f"https://www.linkedin.com/company/{page_id}/",
             industry=scraped.get("industry"),
         )
 
         inserted_id = await insert_page(page_model)
-        page_model.id = inserted_id
+        
+        response = {
+            "_id": inserted_id,
+            "linkedin_id": page_id,
+            "name": page_model.name,
+            "linkedin_url": page_model.linkedin_url,
+            "industry": page_model.industry,
+        }
 
-        return page_model
+        cache_set(cache_key, page_model)
+        return response
     
     except Exception as e:
         logger.error(f"failed to store scraped page{page_id}: {e}")
@@ -61,7 +86,7 @@ async def list_pages(
 
     skip = (page - 1) * limit
 
-    pages = await get_pages(filters=filters, skip=skip, limit=limit)
+    pages = await get_page(filters=filters, skip=skip, limit=limit)
     return{
         "page": page,
         "limit": limit,
@@ -86,4 +111,14 @@ async def get_page_posts(
         "page": page,
         "limit": limit,
         "posts": posts
+    }
+
+@router.get("/pages/{page_id}/summary")
+async def page_summary(page_id: str):
+    """
+    Stub endpoint for future implementation of page summary.
+    """
+    return {
+        "page_id": page_id,
+        "summary": "This is a stub endpoint for page summary."
     }
