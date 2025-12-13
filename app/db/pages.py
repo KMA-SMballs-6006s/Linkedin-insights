@@ -2,8 +2,8 @@ from app.db.mongo import db
 from app.models.page import Page
 from bson import ObjectId
 
-async def get_page_by_id(page_id: str):
-    return await db.pages.find_one({"_id": ObjectId(page_id)})
+async def get_page_by_linkedin_id(linkedin_id: str):
+   return await db.pages.find_one({"linkedin_id": linkedin_id}) 
 
 
 async def insert_page(page: Page):

@@ -4,6 +4,7 @@ from datetime import datetime
 
 class Page(BaseModel):
     id: Optional[str] = Field(default=None, alias="_id")
+    linkedin_id: str
     name: str
     linkedin_url: str
     industry: Optional[str] = None
