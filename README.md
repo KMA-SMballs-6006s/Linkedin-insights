@@ -178,6 +178,13 @@ Response:
   * API responds with `404`
   * Application does not crash
 
+### Followers List
+
+LinkedIn does not expose follower identities publicly on company pages.
+As a result, this service returns only the follower count for a page.
+The followers list is intentionally empty to avoid scraping private or restricted data.
+
+
 ### Employees & Comments
 
 LinkedIn restricts access to detailed employee and comment data without authentication.
