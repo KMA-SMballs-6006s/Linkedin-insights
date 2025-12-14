@@ -1,8 +1,11 @@
 from app.services.cache import get as cache_get, set as cache_set
 from app.utils.serialize import serialize_mongo
 from fastapi import APIRouter, HTTPException, Query
+from app.db import mongo
 from app.db.pages import get_page_by_linkedin_id, insert_page
 from app.db.posts import get_posts_by_page_paginated
+from app.db.employees import insert_employees
+from app.db.comments import instert_comments
 from app.services.scraper import scrape_linkedin_page
 from app.models.page import Page
 from typing import Optional
@@ -19,6 +22,7 @@ async def get_page(page_id: str):
     if cached:
         return cached
     
+
     page = await get_page_by_linkedin_id(page_id)
     if page:
         response = {
@@ -31,6 +35,7 @@ async def get_page(page_id: str):
         cache_set(cache_key, response)
         return response
     
+
     scraped = await scrape_linkedin_page(page_id)
     if not scraped:
         raise HTTPException(status_code=404, detail="Page not found, unable to scrape")
@@ -45,7 +50,14 @@ async def get_page(page_id: str):
         )
 
         inserted_id = await insert_page(page_model)
+
+        await insert_employees([
+            {**e, "page_id": page_id} for e in scraped.get("employees", [])
+        ])
         
+        await instert_comments([scraped.get("comments", [])])
+
+
         response = {
             "_id": inserted_id,
             "linkedin_id": page_id,
@@ -118,6 +130,22 @@ async def get_page_posts(
         "limit": limit,
         "posts": posts
     }
+
+@router.get("/pages/{page_id}/employees")
+async def list_employees(page_id: str):
+    if mongo.db is None:
+        return []
+    
+    cursor = mongo.db.employees.find({"page_id": page_id})
+    return await cursor.to_list(length=100)
+
+@router.get("/pages/{page_id}/comments")
+async def list_comments(page_id: str):
+    if mongo.db is None:
+        return []
+    
+    cursor = mongo.db.comments.find({"page_id": page_id})
+    return await cursor.to_list(length=100)
 
 @router.get("/pages/{page_id}/summary")
 async def page_summary(page_id: str):

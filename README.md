@@ -178,6 +178,13 @@ Response:
   * API responds with `404`
   * Application does not crash
 
+### Employees & Comments
+
+LinkedIn restricts access to detailed employee and comment data without authentication.
+This service maintains **schema-level and API support** for employees and comments, but does not scrape private or restricted data.
+As a result, these endpoints may return empty datasets depending on page visibility.
+
+
 **Design priority:**
 Reliability and graceful degradation over data completeness.
 
