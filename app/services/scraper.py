@@ -95,6 +95,8 @@ async def scrape_linkedin_page(page_id: str) -> Optional[Dict[str, Any]]:
             data["posts"] = posts
             data["employees"] = []
             data["comments"] = []
+            data["head_count"] = None
+            data["specialities"] = []
 
             await browser.close()
             return data

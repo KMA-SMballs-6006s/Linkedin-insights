@@ -31,6 +31,9 @@ async def get_page(page_id: str):
             "name": page.get("name"),
             "linkedin_url": page.get("linkedin_url"),
             "industry": page.get("industry"),
+            "followers_count": page.get("followers_count"),
+            "head_count": page.get("head_count"),
+            "specialities": page.get("specialities") or [],
         }
         cache_set(cache_key, response)
         return response
@@ -47,6 +50,8 @@ async def get_page(page_id: str):
             linkedin_url=f"https://www.linkedin.com/company/{page_id}/",
             industry=scraped.get("industry"),
             followers_count=scraped.get("followers"),
+            head_count=scraped.get("head_count"),
+            specialities=scraped.get("specialities", []),
         )
 
         inserted_id = await insert_page(page_model)
@@ -65,6 +70,8 @@ async def get_page(page_id: str):
             "linkedin_url": page_model.linkedin_url,
             "industry": page_model.industry,
             "followers_count": page_model.followers_count,
+            "head_count": page_model.head_count,
+            "specialities": page_model.specialities,
         }
 
         cache_set(cache_key, page_model)
