@@ -178,6 +178,31 @@ Response:
   * API responds with `404`
   * Application does not crash
 
+  ## ⚠️ Scraping Limitations
+
+This service relies exclusively on **publicly accessible LinkedIn company pages** and does **not use authentication, cookies, or login sessions**.
+
+As a result, the following limitations apply:
+
+- **No login is used**  
+  The scraper operates in headless mode without authentication to avoid accessing private or restricted data.
+
+- **Employee data is restricted**  
+  LinkedIn does not expose detailed employee profiles publicly.  
+  The system maintains **schema-level and API support** for employees, but the returned dataset may be empty depending on page visibility.
+
+- **Post comments are limited**  
+  Most comment threads are not accessible without login.  
+  Comment support exists at the API and database level, but scraping is best-effort and may return empty results.
+
+- **Follower list is not publicly available**  
+  LinkedIn does not expose follower identities for company pages.  
+  Therefore, the `/followers` endpoint returns only the **follower count**, with an intentionally empty followers list.
+
+These constraints are **documented design decisions**, not missing features.  
+The system prioritizes **stability, legality, and transparency** over aggressive or unreliable scraping.
+
+
 ### Followers List
 
 LinkedIn does not expose follower identities publicly on company pages.
