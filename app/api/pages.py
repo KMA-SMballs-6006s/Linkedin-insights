@@ -120,5 +120,5 @@ async def page_summary(page_id: str):
     """
     return {
         "page_id": page_id,
-        "summary": "This is a stub endpoint for page summary."
+        "summary": "AI-generated summary will be available here."
     }
