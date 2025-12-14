@@ -4,6 +4,22 @@ from playwright.async_api import async_playwright
 
 logger = logging.getLogger(__name__)
 
+def parse_followers(text: str | None) -> int | None:
+    if not text:
+        return None
+    
+    text = text.lower().replace("followers", "").strip()
+
+    try:
+        if "m" in text:
+            return int(float(text.replace("m", "").strip()) * 1_000_000)
+        if "k" in text:
+            return int(float(text.replace("k", "").strip()) * 1_000)
+        return int(text.replace(",", ""))
+    except Exception:
+        return None
+        
+
 async def scrape_linkedin_page(page_id: str) -> Optional[Dict[str, Any]]:
     url = f"https://www.linkedin.com/company/{page_id}/"
 
@@ -37,10 +53,11 @@ async def scrape_linkedin_page(page_id: str) -> Optional[Dict[str, Any]]:
                 data["description"] = None
             
             try:
-                followers_text = await page.locator("span.org-top-card-summary__following-count").inner_text()
-                data["followers"] = followers_text
+                raw_followers = await page.locator("span.org-top-card-summary__following-count").inner_text()
             except Exception:
-                data["followers"] = None
+                raw_followers = None
+
+            data["followers"] = parse_followers(raw_followers)
 
             try:
                 data["industry"] = await page.locator("dd.org-page-details__defination-text").nth(0).inner_text()

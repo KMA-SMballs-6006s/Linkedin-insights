@@ -41,6 +41,7 @@ async def get_page(page_id: str):
             name=scraped.get("name"),
             linkedin_url=f"https://www.linkedin.com/company/{page_id}/",
             industry=scraped.get("industry"),
+            followers_count=scraped.get("followers"),
         )
 
         inserted_id = await insert_page(page_model)
@@ -51,6 +52,7 @@ async def get_page(page_id: str):
             "name": page_model.name,
             "linkedin_url": page_model.linkedin_url,
             "industry": page_model.industry,
+            "followers_count": page_model.followers_count,
         }
 
         cache_set(cache_key, page_model)
@@ -69,14 +71,18 @@ async def list_pages(
     limit: int = Query(10, ge=1, le=50),
     page: int = Query(1, ge=1),
 ):
-    filters = {}
+    followers_filter = {}
 
-    if min_followeres is not None or max_followeres is not None:
-        filters["followers"] = {}
-        if min_followeres is not None:
-            filters["followers"]["$gte"] = min_followeres
-        if max_followeres is not None:
-            filters["followers"]["$lte"] = max_followeres
+    if min_followeres is not None:
+        followers_filter["$gte"] = min_followeres
+
+    if max_followeres is not None:
+        followers_filter["$lte"] = max_followeres
+
+    if followers_filter:
+        followers_filter = {"followers_count": followers_filter}
+
+    filters = followers_filter
 
     if industry:
         filters["industry"] = industry

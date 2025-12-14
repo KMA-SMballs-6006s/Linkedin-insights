@@ -8,6 +8,7 @@ class Page(BaseModel):
     name: str
     linkedin_url: str
     industry: Optional[str] = None
+    followers_count: int | None = None
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
     class Config:
