@@ -138,6 +138,16 @@ async def get_page_posts(
         "posts": posts
     }
 
+@router.get("/pages/{page_id}/followers")
+async def get_page_followers(page_id: str):
+    page = await get_page_by_linkedin_id(page_id)
+    if not page:
+        raise HTTPException(status_code=404, detail="Page not found")
+    return {
+        "count": page.get("followers_count"),
+        "followers": []
+    }
+
 @router.get("/pages/{page_id}/employees")
 async def list_employees(page_id: str):
     if mongo.db is None:
