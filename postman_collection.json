@@ -1,0 +1,56 @@
+{
+  "info": {
+    "_postman_id": "e8c6b5a1-1234-4cde-9abc-001122334455",
+    "name": "LinkedIn Insights API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Page by ID",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/pages/microsoft",
+          "protocol": "http",
+          "host": ["127", "0", "0", "1"],
+          "port": "8000",
+          "path": ["pages", "microsoft"]
+        }
+      }
+    },
+    {
+      "name": "List Pages",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/pages?limit=5&page=1",
+          "protocol": "http",
+          "host": ["127", "0", "0", "1"],
+          "port": "8000",
+          "path": ["pages"],
+          "query": [
+            { "key": "limit", "value": "5" },
+            { "key": "page", "value": "1" }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Page Posts",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://127.0.0.1:8000/pages/microsoft/posts?limit=3&page=1",
+          "protocol": "http",
+          "host": ["127", "0", "0", "1"],
+          "port": "8000",
+          "path": ["pages", "microsoft", "posts"],
+          "query": [
+            { "key": "limit", "value": "3" },
+            { "key": "page", "value": "1" }
+          ]
+        }
+      }
+    }
+  ]
+}
